@@ -48,6 +48,8 @@ public class Launcher extends Application {
 
 			final AnchorPane authView = (AnchorPane) loader.load();
 			this.rootView.setCenter(authView);
+
+			loader.getController();
 		} catch (final IOException e) {
 			e.printStackTrace();
 		}
