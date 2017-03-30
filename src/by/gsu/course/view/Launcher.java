@@ -22,6 +22,10 @@ public class Launcher extends Application {
 		return this.primaryStage;
 	}
 
+	public BorderPane getRootView() {
+		return this.rootView;
+	}
+
 	public void initRootView() {
 		try {
 			final FXMLLoader loader = new FXMLLoader();
@@ -41,15 +45,35 @@ public class Launcher extends Application {
 		this.primaryStage = primaryStage;
 	}
 
+	public void setRootView(final BorderPane rootView) {
+		this.rootView = rootView;
+	}
+
 	public void showAuthView() {
 		try {
 			final FXMLLoader loader = new FXMLLoader();
 			loader.setLocation(Launcher.class.getResource("AuthView.fxml"));
-
 			final AnchorPane authView = (AnchorPane) loader.load();
-			this.rootView.setCenter(authView);
+			this.rootView.getChildren().setAll(authView);
 
-			loader.getController();
+			final AuthViewController controller = loader.getController();
+			controller.setLauncher(this);
+		} catch (final IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void showUserView() {
+		try {
+			final FXMLLoader loader = new FXMLLoader();
+			loader.setLocation(Launcher.class.getResource("UserView.fxml"));
+
+			final AnchorPane userView = (AnchorPane) loader.load();
+			this.rootView.getChildren().setAll(userView);
+			this.primaryStage.setWidth(800);
+
+			final UserViewController controller = loader.getController();
+			controller.setLauncher(this);
 		} catch (final IOException e) {
 			e.printStackTrace();
 		}

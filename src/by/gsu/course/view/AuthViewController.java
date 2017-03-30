@@ -1,12 +1,12 @@
 package by.gsu.course.view;
 
-import java.sql.SQLException;
-
 import com.microsoft.sqlserver.jdbc.SQLServerException;
 
 import by.gsu.course.mysql.MySQLConnector;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
@@ -22,9 +22,12 @@ public class AuthViewController {
 	private Label message;
 	@FXML
 	private ImageView logotype;
+	@FXML
+	private Button authButton;
+	@FXML
+	private ComboBox database;
 
-	public AuthViewController() {
-	}
+	private Launcher launcher = null;
 
 	public TextField getHostName() {
 		return this.hostname;
@@ -42,6 +45,10 @@ public class AuthViewController {
 		this.hostname = hostName;
 	}
 
+	public void setLauncher(final Launcher launcher) {
+		this.launcher = launcher;
+	}
+
 	public void setUserName(final TextField userName) {
 		this.username = userName;
 	}
@@ -52,24 +59,32 @@ public class AuthViewController {
 
 	@FXML
 	private void handleButtonAction(final ActionEvent event) throws SQLServerException {
-		final MySQLConnector connector = new MySQLConnector("SSivagin", this.username.getText(),
-				this.password.getText());
-		connector.createConnection();
-		if (connector.getDbConnection() != null) {
-			this.message.setText("Success connection");
-			this.message.setVisible(true);
-			try {
-				connector.getTable();
-			} catch (final SQLException e) {
-				e.printStackTrace();
+		if (this.database.getSelectionModel().getSelectedIndex() != -1) {
+			MySQLConnector.basename = this.database.getSelectionModel().getSelectedItem().toString();
+			MySQLConnector.username = this.username.getText();
+			MySQLConnector.password = this.password.getText();
+			MySQLConnector.createConnection();
+
+			if (MySQLConnector.dbConnection != null) {
+				this.launcher.showUserView();
+			} else {
+				this.message.setText("Connection error");
+				if (!this.message.isVisible()) {
+					this.message.setVisible(true);
+				}
 			}
 		} else {
-			this.message.setText("Connection error");
-			this.message.setVisible(true);
+			this.message.setText("Select database");
+			if (!this.message.isVisible()) {
+				this.message.setVisible(true);
+			}
 		}
 	}
 
 	@FXML
 	private void initialize() {
+		this.database.getItems().add("SSivagin");
+		this.database.getItems().add("VKrupnik");
+		this.database.getItems().add("ETrushkova");
 	}
 }

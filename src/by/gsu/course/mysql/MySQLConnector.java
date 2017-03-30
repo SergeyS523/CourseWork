@@ -5,41 +5,44 @@ import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 public class MySQLConnector {
-	private Connection dbConnection = null;
-	private final String basename;
-	private final String username;
-	private final String password;
+	public static String basename;
+	public static String username;
+	public static String password;
+	public static Connection dbConnection;
 
-	public MySQLConnector(final String basename, final String username, final String password) {
-		this.basename = basename;
-		this.username = username;
-		this.password = password;
-	}
-
-	public void createConnection() {
+	public static void createConnection() {
 		try {
-			final String url = "jdbc:sqlserver://SIARHEI-PC\\SQLEXPRESS;database=" + this.basename;
+			final String url = "jdbc:sqlserver://SIARHEI-PC\\SQLEXPRESS;database=" + MySQLConnector.basename;
 			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-			this.dbConnection = DriverManager.getConnection(url, this.username, this.password);
+			MySQLConnector.dbConnection = DriverManager.getConnection(url, MySQLConnector.username,
+					MySQLConnector.password);
 		} catch (final Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	public Connection getDbConnection() {
-		return this.dbConnection;
-	}
-
-	public void getTable() throws SQLException {
-		final DatabaseMetaData metaData = this.getDbConnection().getMetaData();
-		final ResultSet result = metaData.getTables(null, null, "%", null);
+	public static ResultSet getColums(final String tableName) throws SQLException {
+		final Statement connectStatement = MySQLConnector.dbConnection.createStatement();
+		final String query = "SELECT * FROM dbo." + tableName + ";";
+		final ResultSet result = connectStatement.executeQuery(query);
 
 		while (result.next()) {
-			System.out.println(result.getString(3));
-		}
+			final int workerKey = result.getInt("Код");
+			final String workerName = result.getString("Наименование");
 
-		result.close();
+			System.out.println("Код - " + workerKey + "\n");
+			System.out.println("Наименование - " + workerName + "\n");
+		}
+		return result;
+	}
+
+	public static ResultSet getTables() throws SQLException {
+		final DatabaseMetaData metaData = MySQLConnector.dbConnection.getMetaData();
+		final ResultSet result = metaData.getTables(null, "dbo", null, new String[] { "TABLE" });
+
+		return result;
 	}
 }
